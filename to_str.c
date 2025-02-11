@@ -26,8 +26,29 @@ double power(int a,int b){
     
 }
 
-char* int_to_str(const int num,const int devisor,const char iscapital){
-    int holder;
+int sizeOfStr(char *str){
+    unsigned int i;
+    while(str[i] != '\0'){
+        i++;
+    }
+    return i;
+}
+
+char* join2strs(char* mainstr,char* secstr,int i){//supposed to be called only when mainstr has already enough allocated memory for both
+    int j;
+    j = 0;
+    printf("not joinedStr: %s|%s |i: %d\n",mainstr,secstr,i);
+    while(secstr[j] != '\0'){
+        printf("j: %d",j);
+        mainstr[i + j] = secstr[j];
+        j++;
+    }
+    printf("\njoinedStr: %s\n",mainstr);
+    return mainstr;
+}
+
+char* int_to_str(const unsigned long long int num,const int devisor,const char iscapital){
+    unsigned long long int holder;
     int i;
     int len;
     int margin;//is the margin to decide if letter in the number are capital or not
@@ -36,10 +57,10 @@ char* int_to_str(const int num,const int devisor,const char iscapital){
     //printf("margin: %d\n",margin);
     holder = num;
     i = 0;
-    while(holder != 0){
+    do{
         holder /= devisor;
         i++;
-    }
+    }while(holder != 0);
 
     len = i;
     char *str = malloc(sizeof(char) * len + 1);
@@ -47,7 +68,7 @@ char* int_to_str(const int num,const int devisor,const char iscapital){
     
     i = 0;
     holder = num;
-    while(holder != 0){
+    do{
         if((holder % devisor) > 9){//ensures that the devisor is above 10 aka in hex, but technically anydevisor will work with the entire system
             str[len - i - 1] = (holder % devisor) + '0' + margin;
         }else{
@@ -55,7 +76,7 @@ char* int_to_str(const int num,const int devisor,const char iscapital){
         }
         holder /= devisor;
         i++;
-    }
+    }while(holder != 0);
     str[len] = '\0';
 
     return str;
@@ -69,7 +90,7 @@ char* decimalfloat_to_str(const double num,const int accuracy){//the accuracy be
     double holder;
     char *intstr;
     char *doublestr;
-    long int intpart;
+    unsigned long long int intpart;
     
     intpart = (int)num;
     holder = num - intpart;
@@ -117,13 +138,11 @@ char* floatpart_to_str(const double num, const int devisor, const int accuracy,c
 
     margin = (iscapital != 0)?('A' - '0' - 10):('a' - '0' - 10);
     str = malloc(accuracy + 1);
-    str[0] = '.';
     holder = num - (int)num;
-    printf("holder: %.16f\n",holder);
 
     expo = -1;
-    i = 1;
-    while(expo > - accuracy - 1){
+    i = 0;
+    while(expo >= - accuracy){
         ///printf("%d\n",expo);
         if(holder >= power(16,expo)){//holder will be between 1 * pow(..) and 15 * pow(..), from there we check what is the
             //highest number x from 1 to 15 checks that checks the condition holder >= x * power(16,i)
@@ -134,14 +153,13 @@ char* floatpart_to_str(const double num, const int devisor, const int accuracy,c
             while(j * power(16,expo) <= holder){
                 j++;
             }
-            holder -= (j - 1) * power(16,expo);
+            j--;
+            holder -= j * power(16,expo);
             if(j > 9){
-                str[i] = (j - 1) + '0' + margin;//to take care of letters in hex
+                str[i] = j + '0' + margin;//to take care of letters in hex
             }else{
-                str[i] = (j - 1) + '0';
+                str[i] = j + '0';
             }
-            printf("j - 1: %d\n",j - 1);
-            printf("char: %c\n",str[i]);
 
         }else{
             str[i] = '0';
@@ -158,28 +176,54 @@ char* float_to_hexstr(const double num,const int accuracy,const char iscapital){
     //to take care of entire decimal float, even the int part and turn all of it to hex float
     int i;
     int j;
-    int intpart;
+    int h;
+    double holder;
+    unsigned int expo;
+    char exposign;
     char* tmpstr;
+    char* tmpstr2;
+    char* tmpstr3;
     char* str;
 
-    str = int_to_str((int)num,16,0);
+    holder = num;
+    expo = 0;
+    exposign = (num >= 1)?('+'):('-');
+    while(((int)holder) != 1){
+        (holder >= 1)?(holder /= 2):(holder *= 2);
+        expo++;
+    }
 
-    tmpstr = floatpart_to_str((num - (int)num),16,accuracy,iscapital);
-    i = 0;
-    while(str[i] != '\0'){
-        i++;
-    }
-    j = 0;
-    while(tmpstr[j] != '\0'){
-        j++;
-    }
-    str = realloc(str, i + j);
-    j = 0;
-    while(tmpstr[j] != '\0'){
-        str[i + j] = tmpstr[j];
-        j++;
-    }
-    free(str);
+    tmpstr = int_to_str((int)holder,16,0);//in usual case this always outputs "1", thats what the previous loop makes sure of but, just in case man, just in case
+    tmpstr2 = floatpart_to_str((holder - (int)holder),16,accuracy,iscapital);
+    tmpstr3 = int_to_str(expo,10,0);
+
+    printf("tmpstr: %s  |size1: %d\n",tmpstr,sizeOfStr(tmpstr));
+    printf("tmpstr2: %s |size2: %d\n",tmpstr2,sizeOfStr(tmpstr2));
+    printf("tmpstr3: %s |size3: %d\n",tmpstr3,sizeOfStr(tmpstr3));
+    
+
+    str = malloc(sizeOfStr(tmpstr) + sizeOfStr(tmpstr2) + sizeOfStr(tmpstr3) + 5);
+    str[0] = '0';
+    str[1] = (iscapital)?'X':'x';
+
+    i = 2;
+    join2strs(str,tmpstr,i);
+    i += sizeOfStr(tmpstr);
+    str[i] = '.';
+    i++;
+    join2strs(str,tmpstr2,i);
+    i += sizeOfStr(tmpstr2);
+    str[i] = (iscapital)?('P'):('p');
+    str[i + 1] = exposign;
+    i += 2;
+    join2strs(str,tmpstr3,i);
+    i += sizeOfStr(tmpstr3);
+    str[i] = '\0';
+
+
+    free(tmpstr);
+    free(tmpstr2);
+    free(tmpstr3);
 
     return str;
 }
@@ -207,7 +251,6 @@ char* double_to_sc_notaion(const double num,const int accuracy,const char iscapi
         j++;
     }
     
-    printf("float: %f\n",holder);
     str = decimalfloat_to_str(holder,accuracy);
     expostr = int_to_str(j,10,0);
     j = 0;
@@ -244,9 +287,11 @@ char* double_to_sc_notaion(const double num,const int accuracy,const char iscapi
 
 int main(){
 
-    double x = 16.9584; 
-    printf("str: %s\n",floatpart_to_str(x,16,8,1));
-    printf("printg: %A\n",x);
+    double x = 154894.2356974568;
+    //printf("printf: %+d\n",int_to_str(x,10,0));
+    printf("mine:%s\n",float_to_hexstr(x,20,1));
+    //printf("inttostr: %s\n",int_to_str(0,10,0));
+    printf("help:%.20A\n",x);
 
     return 0;
 }
