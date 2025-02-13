@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <conio.h>
 
+//#ifndef con
+//#define ullint unsigned long long int 
+//#define ldouble
+
 //the use of most of these function will be for onlly positive numbers, they are not supporting negative numbers and they might break the fuctions
 double power(int a,int b){
     int i;
@@ -37,13 +41,10 @@ int sizeOfStr(char *str){
 char* join2strs(char* mainstr,char* secstr,int i){//supposed to be called only when mainstr has already enough allocated memory for both
     int j;
     j = 0;
-    printf("not joinedStr: %s|%s |i: %d\n",mainstr,secstr,i);
     while(secstr[j] != '\0'){
-        printf("j: %d",j);
         mainstr[i + j] = secstr[j];
         j++;
     }
-    printf("\njoinedStr: %s\n",mainstr);
     return mainstr;
 }
 
@@ -84,7 +85,7 @@ char* int_to_str(const unsigned long long int num,const int devisor,const char i
 
 char* decimalfloat_to_str(const double num,const int accuracy){//the accuracy because the the floating point accuracy is a goddam mess, there isnt one correct
     //output, u have to choose the degree of accuracy first thing
-    //this only works with the base 10, will make one with a custom devisor soon
+    //this only works with the base 10, (will make one with a custom devisor soon) a better one was implemented
     int i;
     int j;
     double holder;
@@ -196,10 +197,6 @@ char* float_to_hexstr(const double num,const int accuracy,const char iscapital){
     tmpstr = int_to_str((int)holder,16,0);//in usual case this always outputs "1", thats what the previous loop makes sure of but, just in case man, just in case
     tmpstr2 = floatpart_to_str((holder - (int)holder),16,accuracy,iscapital);
     tmpstr3 = int_to_str(expo,10,0);
-
-    printf("tmpstr: %s  |size1: %d\n",tmpstr,sizeOfStr(tmpstr));
-    printf("tmpstr2: %s |size2: %d\n",tmpstr2,sizeOfStr(tmpstr2));
-    printf("tmpstr3: %s |size3: %d\n",tmpstr3,sizeOfStr(tmpstr3));
     
 
     str = malloc(sizeOfStr(tmpstr) + sizeOfStr(tmpstr2) + sizeOfStr(tmpstr3) + 5);
@@ -287,11 +284,9 @@ char* double_to_sc_notaion(const double num,const int accuracy,const char iscapi
 
 int main(){
 
-    double x = 154894.2356974568;
-    //printf("printf: %+d\n",int_to_str(x,10,0));
-    printf("mine:%s\n",float_to_hexstr(x,20,1));
-    //printf("inttostr: %s\n",int_to_str(0,10,0));
-    printf("help:%.20A\n",x);
+    unsigned long long int x = ((int)power(2,64)) - 1;
+    printf("x: %llu\n",x );
+
 
     return 0;
 }

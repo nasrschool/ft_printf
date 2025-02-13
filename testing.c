@@ -23,11 +23,13 @@ void print(int num,...){
     va_end(args);
 }
 
-
+#define ullint unsigned long long int 
 int main(){
-    //int *ptr = malloc(16);
-   
-    float num = 102.3 - ((int)(102.3 / 1));
-    printf("%f\n",num);
+    int x = 2;
+
+    //x  = x++ - x;
+    
+    printf("%d\n",(++x - x + 1));
+    //printf("sizeof(x): %d",sizeof(short int));
     return 0;
 }
